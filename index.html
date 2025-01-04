@@ -120,4 +120,12 @@
         // ✅ Expand/Collapse Function
         function toggleDetails(element) {
             const row = element.closest("tr").nextElementSibling;
-            row.cl
+            row.classList.toggle("hidden");
+            element.innerText = row.classList.contains("hidden") ? "➕ More Info" : "➖ Hide Info";
+        }
+
+        // ✅ Load Data on Page Load
+        window.onload = loadMatchData;
+    </script>
+</body>
+</html>
