@@ -10,7 +10,18 @@
         th { background-color: red; color: white; }
         img { max-width: 80px; border-radius: 10px; }
         .hidden { display: none; }
-        .match-pics img { max-width: 120px; margin: 5px; border-radius: 10px; }
+        .match-pics img {
+    max-width: 100%;    /* Allows the image to scale with the container */
+    height: auto;       /* Maintain aspect ratio */
+    border-radius: 10px;
+    margin: 10px;
+    display: block;     /* Prevent side-by-side stacking */
+}
+
+img { 
+    max-width: 300px;    /* Increase the size for general images */
+    height: auto;
+}
         .expand-btn { cursor: pointer; font-weight: bold; color: blue; text-decoration: underline; }
     </style>
 </head>
@@ -91,12 +102,15 @@
                         const imgContainer = document.createElement("div");
                         imgContainer.classList.add("match-pics");
                         const imageUrls = row[8].split(",");
-                        imageUrls.forEach(url => {
-                            const img = document.createElement("img");
-                            img.src = url.trim();
-                            img.alt = "Match Picture";
-                            imgContainer.appendChild(img);
-                        });
+imageUrls.forEach(url => {
+    const img = document.createElement("img");
+    img.src = url.trim();
+    img.alt = "Match Picture";
+    img.style.maxWidth = "300px";  // ✅ Increased size for better visibility
+    img.style.height = "auto";
+    img.style.borderRadius = "10px";
+    imgContainer.appendChild(img);
+});
 
                         // ✅ Display Match Note
                         const note = document.createElement("p");
