@@ -2,59 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Match Tracker with Google Sheets</title>
+    <title>Weekly Match Tracker</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
+        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 10px; }
+        th { background-color: #f0f0f0; }
     </style>
 </head>
 <body>
-    <h1>Match Tracker</h1>
+    <h1>Weekly Match Tracker</h1>
+    <h3>All Match Results</h3>
 
-    <p>Team A: <input type="text" id="teamA_name"></p>
-    <p>Team B: <input type="text" id="teamB_name"></p>
-
-    <p>Match 1: 
-        <input type="number" id="match1_teamA"> - 
-        <input type="number" id="match1_teamB">
-    </p>
-    <p>Match 2: 
-        <input type="number" id="match2_teamA"> - 
-        <input type="number" id="match2_teamB">
-    </p>
-
-    <button onclick="submitMatchData()">Submit Match Data</button>
-    <p id="responseMessage"></p>
+    <!-- Table where results will be shown -->
+    <table id="matchResults">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Team A</th>
+                <th>Team B</th>
+                <th>Match 1 Score (A)</th>
+                <th>Match 1 Score (B)</th>
+                <th>Match 2 Score (A)</th>
+                <th>Match 2 Score (B)</th>
+                <th>Total Score (A)</th>
+                <th>Total Score (B)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
     <script>
-        const googleSheetURL = ""; 
+        // Paste your Google Sheet CSV link here (Ensure "output=csv" at the end)
+        const googleSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-XXXXXXX/pub?output=csv";
 
-        function submitMatchData() {
-            const teamA = document.getElementById('teamA_name').value;
-            const teamB = document.getElementById('teamB_name').value;
-            const match1A = parseInt(document.getElementById('match1_teamA').value) || 0;
-            const match1B = parseInt(document.getElementById('match1_teamB').value) || 0;
-            const match2A = parseInt(document.getElementById('match2_teamA').value) || 0;
-            const match2B = parseInt(document.getElementById('match2_teamB').value) || 0;
-            const totalA = match1A + match2A;
-            const totalB = match1B + match2B;
+        async function loadMatchData() {
+            try {
+                const response = await fetch(googleSheetURL);
+                const data = await response.text();
+                
+                // Split CSV data by line and comma
+                const rows = data.split("\n").map(row => row.split(","));
+                const tbody = document.querySelector("#matchResults tbody");
+                
+                // Clear old data
+                tbody.innerHTML = "";
 
-            const matchData = {
-                teamA, teamB, match1A, match1B, match2A, match2B, totalA, totalB
-            };
-
-            fetch(googleSheetURL, {
-                method: 'POST',
-                body: JSON.stringify(matchData),
-                headers: { "Content-Type": "application/json" }
-            })
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('responseMessage').innerText = "Data Submitted Successfully!";
-            })
-            .catch(error => {
-                document.getElementById('responseMessage').innerText = "Error: " + error.message;
-            });
+                // Skip the first row (headers) and loop through the data
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.length > 1) { // Prevent empty rows from showing
+                        const tr = document.createElement("tr");
+                        row.forEach(cell => {
+                            const td = document.createElement("td");
+                            td.textContent = cell;
+                            tr.appendChild(td);
+                        });
+                        tbody.appendChild(tr);
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading data:", error);
+            }
         }
+
+        // Load data when the page loads
+        window.onload = loadMatchData;
     </script>
 </body>
 </html>
