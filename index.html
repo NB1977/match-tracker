@@ -6,21 +6,24 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         table { width: 80%; margin: 20px auto; border-collapse: collapse; }
-        th, td { border: 1px solid black; padding: 10px; }
+        th, td { border: 1px solid black; padding: 10px; text-align: center; }
         th { background-color: #f0f0f0; }
+        img { max-width: 80px; border-radius: 10px; }
     </style>
 </head>
 <body>
     <h1>Weekly Match Tracker</h1>
     <h3>All Match Results</h3>
 
-    <!-- Table where results will be shown -->
+    <!-- Table to Display Match Data with Logos -->
     <table id="matchResults">
         <thead>
             <tr>
                 <th>Date</th>
                 <th>Team A</th>
+                <th>Team A Logo</th>
                 <th>Team B</th>
+                <th>Team B Logo</th>
                 <th>Match 1 Score (A)</th>
                 <th>Match 1 Score (B)</th>
                 <th>Match 2 Score (A)</th>
@@ -33,7 +36,7 @@
     </table>
 
     <script>
-        // Paste your Google Sheet CSV link here (Ensure "output=csv" at the end)
+        // Replace with your Google Sheets Published CSV URL (Ensure "output=csv")
         const googleSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-XXXXXXX/pub?output=csv";
 
         async function loadMatchData() {
@@ -44,18 +47,29 @@
                 // Split CSV data by line and comma
                 const rows = data.split("\n").map(row => row.split(","));
                 const tbody = document.querySelector("#matchResults tbody");
-                
-                // Clear old data
+
+                // Clear any old data
                 tbody.innerHTML = "";
 
-                // Skip the first row (headers) and loop through the data
+                // Loop through the rows (starting from 2nd row to skip headers)
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
-                    if (row.length > 1) { // Prevent empty rows from showing
+                    if (row.length > 1) {
                         const tr = document.createElement("tr");
-                        row.forEach(cell => {
+
+                        // Create cells for each data point
+                        row.forEach((cell, index) => {
                             const td = document.createElement("td");
-                            td.textContent = cell;
+
+                            // If it's the Team A or B logo column, display an image
+                            if (index === 2 || index === 4) {
+                                const img = document.createElement("img");
+                                img.src = cell.trim(); // Use the URL from the sheet
+                                img.alt = "Team Logo";
+                                td.appendChild(img);
+                            } else {
+                                td.textContent = cell;
+                            }
                             tr.appendChild(td);
                         });
                         tbody.appendChild(tr);
@@ -66,7 +80,7 @@
             }
         }
 
-        // Load data when the page loads
+        // Load data on page load
         window.onload = loadMatchData;
     </script>
 </body>
