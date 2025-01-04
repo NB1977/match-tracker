@@ -2,137 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soccer Team Matchup</title>
+    <title>Match Tracker with Google Sheets</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
-        }
-        input, select, button {
-            padding: 10px;
-            width: 100%;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        .results {
-            margin-top: 20px;
-        }
-        .result-item {
-            margin: 5px 0;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Soccer Match Results</h1>
+    <h1>Match Tracker</h1>
 
-        <label for="team1">Team 1 Name</label>
-        <input type="text" id="team1" placeholder="Enter Team 1 Name">
+    <p>Team A: <input type="text" id="teamA_name"></p>
+    <p>Team B: <input type="text" id="teamB_name"></p>
 
-        <label for="team1Logo">Team 1 Logo</label>
-        <input type="file" id="team1Logo" accept="image/*">
+    <p>Match 1: 
+        <input type="number" id="match1_teamA"> - 
+        <input type="number" id="match1_teamB">
+    </p>
+    <p>Match 2: 
+        <input type="number" id="match2_teamA"> - 
+        <input type="number" id="match2_teamB">
+    </p>
 
-        <label for="team2">Team 2 Name</label>
-        <input type="text" id="team2" placeholder="Enter Team 2 Name">
-
-        <label for="team2Logo">Team 2 Logo</label>
-        <input type="file" id="team2Logo" accept="image/*">
-
-        <label for="score1">Score for Field 1 (e.g., 2-1)</label>
-        <input type="text" id="score1" placeholder="Enter score for Field 1">
-
-        <label for="score2">Score for Field 2 (e.g., 3-2)</label>
-        <input type="text" id="score2" placeholder="Enter score for Field 2">
-
-        <label for="totalScore">Total Score (e.g., 5-3)</label>
-        <input type="text" id="totalScore" placeholder="Enter total score">
-
-        <label for="gameImages">Upload Images from the Game</label>
-        <input type="file" id="gameImages" accept="image/*" multiple>
-
-        <button onclick="addResult()">Add Result</button>
-
-        <div class="results">
-            <h2>Match Results</h2>
-            <div id="resultsList"></div>
-        </div>
-    </div>
+    <button onclick="submitMatchData()">Submit Match Data</button>
+    <p id="responseMessage"></p>
 
     <script>
-        function addResult() {
-            const team1 = document.getElementById('team1').value;
-            const team1Logo = document.getElementById('team1Logo').files[0];
-            const team2 = document.getElementById('team2').value;
-            const team2Logo = document.getElementById('team2Logo').files[0];
-            const score1 = document.getElementById('score1').value;
-            const score2 = document.getElementById('score2').value;
-            const totalScore = document.getElementById('totalScore').value;
-            const gameImages = document.getElementById('gameImages').files;
+        const googleSheetURL = "PASTE-YOUR-GOOGLE-SHEETS-API-URL-HERE"; 
 
-            if (!team1 || !team2 || !score1 || !score2 || !totalScore || team1 === team2) {
-                alert('Please enter valid team names, different teams, and scores!');
-                return;
-            }
+        function submitMatchData() {
+            const teamA = document.getElementById('teamA_name').value;
+            const teamB = document.getElementById('teamB_name').value;
+            const match1A = parseInt(document.getElementById('match1_teamA').value) || 0;
+            const match1B = parseInt(document.getElementById('match1_teamB').value) || 0;
+            const match2A = parseInt(document.getElementById('match2_teamA').value) || 0;
+            const match2B = parseInt(document.getElementById('match2_teamB').value) || 0;
+            const totalA = match1A + match2A;
+            const totalB = match1B + match2B;
 
-            const resultsList = document.getElementById('resultsList');
+            const matchData = {
+                teamA, teamB, match1A, match1B, match2A, match2B, totalA, totalB
+            };
 
-            const resultItem = document.createElement('div');
-            resultItem.classList.add('result-item');
-            
-            const team1LogoURL = team1Logo ? URL.createObjectURL(team1Logo) : '';
-            const team2LogoURL = team2Logo ? URL.createObjectURL(team2Logo) : '';
-
-            let gameImagesHTML = '';
-            for (const image of gameImages) {
-                const imageURL = URL.createObjectURL(image);
-                gameImagesHTML += `<img src="${imageURL}" alt="Game Image" style="width: 100px; margin: 5px;">`;
-            }
-
-            resultItem.innerHTML = `
-                <div>
-                    <strong>${team1}</strong> <img src="${team1LogoURL}" alt="Team 1 Logo" style="width: 50px; vertical-align: middle;">
-                    vs 
-                    <strong>${team2}</strong> <img src="${team2LogoURL}" alt="Team 2 Logo" style="width: 50px; vertical-align: middle;">
-                </div>
-                <div>Field 1: ${score1}, Field 2: ${score2}, Total: ${totalScore}</div>
-                <div>${gameImagesHTML}</div>
-            `;
-
-            resultsList.appendChild(resultItem);
-
-            // Clear inputs after adding
-            document.getElementById('team1').value = "";
-            document.getElementById('team1Logo').value = "";
-            document.getElementById('team2').value = "";
-            document.getElementById('team2Logo').value = "";
-            document.getElementById('score1').value = "";
-            document.getElementById('score2').value = "";
-            document.getElementById('totalScore').value = "";
-            document.getElementById('gameImages').value = "";
+            fetch(googleSheetURL, {
+                method: 'POST',
+                body: JSON.stringify(matchData),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('responseMessage').innerText = "Data Submitted Successfully!";
+            })
+            .catch(error => {
+                document.getElementById('responseMessage').innerText = "Error: " + error.message;
+            });
         }
     </script>
 </body>
