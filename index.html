@@ -8,21 +8,8 @@
         table { width: 90%; margin: 20px auto; border-collapse: collapse; }
         th, td { border: 1px solid black; padding: 10px; text-align: center; }
         th { background-color: red; color: white; }
-        
-        /* ✅ Smaller Team Logos */
-        img.team-logo {
-            max-width: 80px;
-            border-radius: 10px;
-        }
-
-        /* ✅ Larger Match Pictures Only */
-        .match-pics img {
-            max-width: 400px;  /* Bigger size for match images */
-            height: auto;
-            border-radius: 10px;
-            margin: 10px;
-        }
-
+        img.team-logo { max-width: 80px; border-radius: 10px; }
+        .match-pics img { max-width: 400px; height: auto; border-radius: 10px; margin: 10px; }
         .hidden { display: none; }
         .expand-btn { cursor: pointer; font-weight: bold; color: blue; text-decoration: underline; }
     </style>
@@ -31,7 +18,7 @@
     <h1>⚽ Hapoel Tel Aviv Goal Tracker ⚽</h1>
     <h3>Click on a match for more details!</h3>
 
-    <!-- Main Table for Match Results -->
+    <!-- Table for Match Results -->
     <table id="matchResults">
         <thead>
             <tr>
@@ -54,12 +41,18 @@
 
         async function loadMatchData() {
             try {
-                const response = await fetch(googleSheetURL);
+                // ✅ Cache Bypass and Fetching CSV
+                const timestamp = new Date().getTime(); 
+                const csvURL = `${googleSheetURL}&cacheBuster=${timestamp}`;
+                const response = await fetch(csvURL);
                 const data = await response.text();
                 
-                const rows = data.split("\n").map(row => row.split(","));
+                // ✅ Safer CSV Parsing
+                const rows = data.split("\n").map(row => {
+                    return row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+                });
+                
                 const tbody = document.querySelector("#matchResults tbody");
-
                 tbody.innerHTML = "";
 
                 for (let i = 1; i < rows.length; i++) {
@@ -67,7 +60,7 @@
                     if (row.length > 1) {
                         const tr = document.createElement("tr");
 
-                        // ✅ Display Match Info (Team Logos Small)
+                        // ✅ Display Standard Match Info
                         for (let j = 0; j < 7; j++) {
                             const td = document.createElement("td");
 
@@ -83,20 +76,18 @@
                             tr.appendChild(td);
                         }
 
-                        // ✅ Expand Button for More Info
+                        // ✅ Expand Button
                         const expandTd = document.createElement("td");
                         expandTd.innerHTML = '<span class="expand-btn" onclick="toggleDetails(this)">➕ More Info</span>';
                         tr.appendChild(expandTd);
                         tbody.appendChild(tr);
 
-                        // ✅ Hidden Row for Match Pictures (Larger Size)
+                        // ✅ Hidden Row for Pictures and Note
                         const detailRow = document.createElement("tr");
                         detailRow.classList.add("hidden");
-
                         const detailTd = document.createElement("td");
                         detailTd.setAttribute("colspan", "8");
 
-                        // ✅ Display Match Pictures from Google Drive
                         const imgContainer = document.createElement("div");
                         imgContainer.classList.add("match-pics");
                         const imageUrls = row[8].split(",");
@@ -107,10 +98,8 @@
                             imgContainer.appendChild(img);
                         });
 
-                        // ✅ Display Match Note
                         const note = document.createElement("p");
                         note.innerText = `📝 Note: ${row[9]}`;
-
                         detailTd.appendChild(imgContainer);
                         detailTd.appendChild(note);
                         detailRow.appendChild(detailTd);
@@ -122,8 +111,11 @@
             }
         }
 
-        // ✅ Function for Expanding/Collapsing Rows
         function toggleDetails(element) {
             const row = element.closest("tr").nextElementSibling;
             row.classList.toggle("hidden");
-            element
+        }
+        window.onload = loadMatchData;
+    </script>
+</body>
+</html>
