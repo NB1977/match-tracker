@@ -2,20 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Weekly Match Tracker</title>
+    <title>Hapoel Tel Aviv Goal Tracker</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
-        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+        table { width: 90%; margin: 20px auto; border-collapse: collapse; }
         th, td { border: 1px solid black; padding: 10px; text-align: center; }
-        th { background-color: #f0f0f0; }
+        th { background-color: red; color: white; }
         img { max-width: 80px; border-radius: 10px; }
+        .hidden { display: none; }
+        .match-pics img { max-width: 100px; margin: 5px; border-radius: 10px; }
+        .expand-btn { cursor: pointer; font-weight: bold; color: blue; text-decoration: underline; }
     </style>
 </head>
 <body>
-    <h1>Weekly Match Tracker</h1>
-    <h3>All Match Results</h3>
+    <h1>⚽ Hapoel Tel Aviv Goal Tracker ⚽</h1>
+    <h3>Click on a match for more details!</h3>
 
-    <!-- Table to Display Match Data with Logos -->
+    <!-- Table for Single Match Display with Total Scores -->
     <table id="matchResults">
         <thead>
             <tr>
@@ -24,55 +27,86 @@
                 <th>Team A Logo</th>
                 <th>Team B</th>
                 <th>Team B Logo</th>
-                <th>Match 1 Score (A)</th>
-                <th>Match 1 Score (B)</th>
-                <th>Match 2 Score (A)</th>
-                <th>Match 2 Score (B)</th>
-                <th>Total Score (A)</th>
-                <th>Total Score (B)</th>
+                <th>Team A Score</th>
+                <th>Team B Score</th>
+                <th>More Info</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
 
+    <!-- JavaScript to Load Data and Expand Rows -->
     <script>
-        // Replace with your Google Sheets Published CSV URL (Ensure "output=csv")
-        const googleSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQLP3NhY3OCbw3X5Ry0jGfTWQRUW1BQxYX8wia8C_zXWalYQiak1MkPiqbIEFBHJONej08svc5T9j5q/pub?output=csv";
+        const googleSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQLP3NhY3OCbw3X5Ry0jGfTWQRUW1BQxYX8wia8C_zXWalYQiak1MkPiqbIEFBHJONej08svc5T9j5q/pub?output=csv;
 
         async function loadMatchData() {
             try {
                 const response = await fetch(googleSheetURL);
                 const data = await response.text();
                 
-                // Split CSV data by line and comma
                 const rows = data.split("\n").map(row => row.split(","));
                 const tbody = document.querySelector("#matchResults tbody");
 
-                // Clear any old data
                 tbody.innerHTML = "";
 
-                // Loop through the rows (starting from 2nd row to skip headers)
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (row.length > 1) {
                         const tr = document.createElement("tr");
 
-                        // Create cells for each data point
-                        row.forEach((cell, index) => {
+                        // Fill in standard columns for match data
+                        for (let j = 0; j < 7; j++) {
                             const td = document.createElement("td");
 
-                            // If it's the Team A or B logo column, display an image
-                            if (index === 2 || index === 4) {
+                            // ✅ Display Team Logos for Team A and Team B
+                            if (j === 2 || j === 4) {
                                 const img = document.createElement("img");
-                                img.src = cell.trim(); // Use the URL from the sheet
+                                img.src = row[j].trim();
                                 img.alt = "Team Logo";
                                 td.appendChild(img);
                             } else {
-                                td.textContent = cell;
+                                td.textContent = row[j];
                             }
                             tr.appendChild(td);
-                        });
+                        }
+
+                        // ✅ Add Expand Button for Extra Details
+                        const expandTd = document.createElement("td");
+                        expandTd.innerHTML = '<span class="expand-btn" onclick="toggleDetails(this)">➕ More Info</span>';
+                        tr.appendChild(expandTd);
                         tbody.appendChild(tr);
+
+                        // ✅ Hidden Row for Extra Details (Goal Scorers, Pictures, Note)
+                        const detailRow = document.createElement("tr");
+                        detailRow.classList.add("hidden");
+
+                        const detailTd = document.createElement("td");
+                        detailTd.setAttribute("colspan", "8");
+
+                        // ✅ Display Goal Scorers for Hapoel Tel Aviv
+                        const goalScorers = document.createElement("p");
+                        goalScorers.innerHTML = `<strong>🎯 Hapoel Tel Aviv Goal Scorers:</strong> ${row[7]}`;
+
+                        // ✅ Display Match Pictures
+                        const imgContainer = document.createElement("div");
+                        imgContainer.classList.add("match-pics");
+                        const imageUrls = row[8].split(",");
+                        imageUrls.forEach(url => {
+                            const img = document.createElement("img");
+                            img.src = url.trim();
+                            img.alt = "Match Picture";
+                            imgContainer.appendChild(img);
+                        });
+
+                        // ✅ Display Match Note
+                        const note = document.createElement("p");
+                        note.innerText = `📝 Note: ${row[9]}`;
+
+                        detailTd.appendChild(goalScorers);
+                        detailTd.appendChild(imgContainer);
+                        detailTd.appendChild(note);
+                        detailRow.appendChild(detailTd);
+                        tbody.appendChild(detailRow);
                     }
                 }
             } catch (error) {
@@ -80,7 +114,14 @@
             }
         }
 
-        // Load data on page load
+        // ✅ Function to Expand or Collapse the Row
+        function toggleDetails(element) {
+            const row = element.closest("tr").nextElementSibling;
+            row.classList.toggle("hidden");
+            element.innerText = row.classList.contains("hidden") ? "➕ More Info" : "➖ Hide Info";
+        }
+
+        // ✅ Load data when the page loads
         window.onload = loadMatchData;
     </script>
 </body>
