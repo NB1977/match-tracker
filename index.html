@@ -8,20 +8,22 @@
         table { width: 90%; margin: 20px auto; border-collapse: collapse; }
         th, td { border: 1px solid black; padding: 10px; text-align: center; }
         th { background-color: red; color: white; }
-        img { max-width: 80px; border-radius: 10px; }
-        .hidden { display: none; }
-        .match-pics img {
-    max-width: 100%;    /* Allows the image to scale with the container */
-    height: auto;       /* Maintain aspect ratio */
-    border-radius: 10px;
-    margin: 10px;
-    display: block;     /* Prevent side-by-side stacking */
-}
+        
+        /* ✅ Smaller Team Logos */
+        img.team-logo {
+            max-width: 80px;
+            border-radius: 10px;
+        }
 
-img { 
-    max-width: 300px;    /* Increase the size for general images */
-    height: auto;
-}
+        /* ✅ Larger Match Pictures Only */
+        .match-pics img {
+            max-width: 400px;  /* Bigger size for match images */
+            height: auto;
+            border-radius: 10px;
+            margin: 10px;
+        }
+
+        .hidden { display: none; }
         .expand-btn { cursor: pointer; font-weight: bold; color: blue; text-decoration: underline; }
     </style>
 </head>
@@ -29,7 +31,7 @@ img {
     <h1>⚽ Hapoel Tel Aviv Goal Tracker ⚽</h1>
     <h3>Click on a match for more details!</h3>
 
-    <!-- Table for Match Display with Total Scores -->
+    <!-- Main Table for Match Results -->
     <table id="matchResults">
         <thead>
             <tr>
@@ -46,7 +48,7 @@ img {
         <tbody></tbody>
     </table>
 
-    <!-- JavaScript to Load Data and Expand Rows -->
+    <!-- ✅ JavaScript for Loading Data and Expanding Rows -->
     <script>
         const googleSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQLP3NhY3OCbw3X5Ry0jGfTWQRUW1BQxYX8wia8C_zXWalYQiak1MkPiqbIEFBHJONej08svc5T9j5q/pub?output=csv";
 
@@ -65,15 +67,15 @@ img {
                     if (row.length > 1) {
                         const tr = document.createElement("tr");
 
-                        // Display Standard Match Info
+                        // ✅ Display Match Info (Team Logos Small)
                         for (let j = 0; j < 7; j++) {
                             const td = document.createElement("td");
 
-                            // ✅ Display Team Logos
                             if (j === 2 || j === 4) {
                                 const img = document.createElement("img");
                                 img.src = row[j].trim();
                                 img.alt = "Team Logo";
+                                img.classList.add("team-logo");
                                 td.appendChild(img);
                             } else {
                                 td.textContent = row[j];
@@ -87,36 +89,28 @@ img {
                         tr.appendChild(expandTd);
                         tbody.appendChild(tr);
 
-                        // ✅ Hidden Row for Extra Details (Goal Scorers, Pictures, Note)
+                        // ✅ Hidden Row for Match Pictures (Larger Size)
                         const detailRow = document.createElement("tr");
                         detailRow.classList.add("hidden");
 
                         const detailTd = document.createElement("td");
                         detailTd.setAttribute("colspan", "8");
 
-                        // ✅ Display Goal Scorers
-                        const goalScorers = document.createElement("p");
-                        goalScorers.innerHTML = `<strong>🎯 Hapoel Tel Aviv Goal Scorers:</strong> ${row[7]}`;
-
-                        // ✅ Display Match Pictures (Multiple Images)
+                        // ✅ Display Match Pictures from Google Drive
                         const imgContainer = document.createElement("div");
                         imgContainer.classList.add("match-pics");
                         const imageUrls = row[8].split(",");
-imageUrls.forEach(url => {
-    const img = document.createElement("img");
-    img.src = url.trim();
-    img.alt = "Match Picture";
-    img.style.maxWidth = "300px";  // ✅ Increased size for better visibility
-    img.style.height = "auto";
-    img.style.borderRadius = "10px";
-    imgContainer.appendChild(img);
-});
+                        imageUrls.forEach(url => {
+                            const img = document.createElement("img");
+                            img.src = url.trim();
+                            img.alt = "Match Picture";
+                            imgContainer.appendChild(img);
+                        });
 
                         // ✅ Display Match Note
                         const note = document.createElement("p");
                         note.innerText = `📝 Note: ${row[9]}`;
 
-                        detailTd.appendChild(goalScorers);
                         detailTd.appendChild(imgContainer);
                         detailTd.appendChild(note);
                         detailRow.appendChild(detailTd);
@@ -128,15 +122,8 @@ imageUrls.forEach(url => {
             }
         }
 
-        // ✅ Expand and Collapse Function
+        // ✅ Function for Expanding/Collapsing Rows
         function toggleDetails(element) {
             const row = element.closest("tr").nextElementSibling;
             row.classList.toggle("hidden");
-            element.innerText = row.classList.contains("hidden") ? "➕ More Info" : "➖ Hide Info";
-        }
-
-        // ✅ Load data when the page loads
-        window.onload = loadMatchData;
-    </script>
-</body>
-</html>
+            element
