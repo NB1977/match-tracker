@@ -15,7 +15,7 @@
     </style>
 </head>
 <body>
-    <h1>⚽ Hapoel Tel Aviv Goal Tracker ⚽</h1>
+    <h1>⚽ Hapoel Tel Aviv טרום ב ⚽</h1>
     <h3>Click on a match for more details!</h3>
 
     <!-- Main Table for Match Results -->
@@ -87,7 +87,7 @@
 
                         // ✅ Display Goal Scorers (Fix Added Here)
                         const goalScorers = document.createElement("p");
-                        goalScorers.innerHTML = `<strong>🎯 Hapoel Tel Aviv Goal Scorers:</strong> ${row[7]}`;
+                        goalScorers.innerHTML = `<strong>🎯 Hapoel Tel Aviv Recap:</strong> ${row[7]}`;
 
                         // ✅ Display Match Pictures from Google Drive
                         const imgContainer = document.createElement("div");
@@ -102,7 +102,7 @@
 
                         // ✅ Display Match Note
                         const note = document.createElement("p");
-                        note.innerText = `📝 Note: ${row[9]}`;
+                        note.innerText = `📝 Coach take: ${row[9]}`;
 
                         // ✅ Append all expanded content properly
                         detailTd.appendChild(goalScorers);  // Fix added here
